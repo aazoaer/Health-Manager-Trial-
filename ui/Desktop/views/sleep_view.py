@@ -1,6 +1,6 @@
 import flet as ft
-from ui.components.sleep_card import SleepCard
-from ui.components.sleep_stats_card import SleepStatsCard
+from ui.Desktop.components.sleep_card import SleepCard
+from ui.Desktop.components.sleep_stats_card import SleepStatsCard
 
 class SleepView(ft.Container):
     def __init__(self):

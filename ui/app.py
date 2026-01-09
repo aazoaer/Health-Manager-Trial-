@@ -3,19 +3,27 @@ import asyncio
 from datetime import datetime
 import sys
 import os
-from ui.styles import AppColors
-from ui.components.navigation import AppNavigationRail
-from ui.components.water_card import WaterCard
-from ui.components.food_card import FoodCard
-from ui.components.nutrition_goals_card import NutritionGoalsCard
-from ui.views.home_view import HomeView
-from ui.views.water_view import WaterView
-from ui.views.food_view import FoodView
-from ui.views.sleep_view import SleepView
-from ui.views.exercise_view import ExerciseView
-from ui.views.calendar_view import CalendarView
-from ui.views.setting_view import SettingView
-from core.reminder_logic import is_reminder_time, should_trigger_reminder
+from ui.styles import AppColors, is_mobile
+from ui.Desktop.components.navigation import AppNavigationRail
+from ui.Mobile.components.navigation import MobileNavigationBar
+
+from ui.Desktop.components.water_card import WaterCard as DesktopWaterCard
+from ui.Mobile.components.water_card import WaterCard as MobileWaterCard
+from ui.Desktop.components.food_card import FoodCard
+from ui.Desktop.components.nutrition_goals_card import NutritionGoalsCard
+
+from ui.Desktop.views.home_view import HomeView
+from ui.Desktop.views.water_view import WaterView as DesktopWaterView
+from ui.Mobile.views.water_view import WaterView as MobileWaterView
+from ui.Desktop.views.food_view import FoodView
+from ui.Desktop.views.sleep_view import SleepView
+from ui.Desktop.views.exercise_view import ExerciseView
+from ui.Desktop.views.calendar_view import CalendarView as DesktopCalendarView
+from ui.Mobile.views.calendar_view import CalendarView as MobileCalendarView
+from ui.Desktop.views.setting_view import SettingView as DesktopSettingView
+from ui.Mobile.views.setting_view import SettingView as MobileSettingView
+
+from ui.Desktop.components.reminder_card import is_reminder_time, should_trigger_reminder
 from core.i18n import i18n_manager
 from core.system_tray import SystemTray
 from core.notification import send_notification, flash_window
@@ -28,6 +36,11 @@ class HealthApp:
         self.loop = asyncio.get_running_loop()
         self.last_reminder_minute = None
         self.system_tray = None
+        
+
+        self.is_mobile_layout = True
+        self.main_layout = None 
+        
         init_db()
         self._setup_page()
         self._init_shared_components()
@@ -37,6 +50,8 @@ class HealthApp:
         self._build_ui()
         self._setup_system_tray()
         self.page.update()
+        
+
         
         self.reminder_task = asyncio.create_task(self._reminder_check_loop())
 
@@ -66,22 +81,35 @@ class HealthApp:
                 self.page.window.icon = icon_path
 
     def _init_shared_components(self):
-        self.water_card = WaterCard()
-        self.nutrition_goals_card = NutritionGoalsCard(food_card_ref=None)
-        self.food_card = FoodCard(nutrition_goals_card_ref=self.nutrition_goals_card)
-        self.nutrition_goals_card.food_card_ref = self.food_card
+        if self.is_mobile_layout:
+            self.water_card = MobileWaterCard()
+
+        else:
+            self.water_card = DesktopWaterCard()
+            self.nutrition_goals_card = NutritionGoalsCard(food_card_ref=None)
+            self.food_card = FoodCard(nutrition_goals_card_ref=self.nutrition_goals_card)
+            self.nutrition_goals_card.food_card_ref = self.food_card
 
     def _init_views(self):
-        self.views = {
-            0: HomeView(),
-            1: WaterView(water_card=self.water_card),
-            2: FoodView(nutrition_goals_card=self.nutrition_goals_card, food_card=self.food_card),
-            3: SleepView(),
-            4: ExerciseView(),
-            5: CalendarView(),
-            6: SettingView()
-        }
-        self.current_view_index = 0
+        if self.is_mobile_layout:
+
+            self.views = {
+                1: MobileWaterView(water_card=self.water_card),
+                5: MobileCalendarView(),
+                6: MobileSettingView()
+            }
+            self.current_view_index = 1
+        else:
+            self.views = {
+                0: HomeView(),
+                1: DesktopWaterView(water_card=self.water_card),
+                2: FoodView(nutrition_goals_card=self.nutrition_goals_card, food_card=self.food_card),
+                3: SleepView(),
+                4: ExerciseView(),
+                5: DesktopCalendarView(),
+                6: DesktopSettingView()
+            }
+            self.current_view_index = 0
 
     def _setup_window_controls(self):
         if not self.page.web:
@@ -285,25 +313,53 @@ class HealthApp:
             pass
 
     def _build_ui(self):
+
+        if self.current_view_index not in self.views:
+             self.current_view_index = 1 if self.is_mobile_layout else 0
+        
         self.content_area = ft.Container(
-            content=self.views[0],
+            content=self.views[self.current_view_index],
             expand=True,
             bgcolor=AppColors.BACKGROUND
         )
 
-        self.navigation_rail = AppNavigationRail(
-            on_destination_selected=self._on_nav_change
-        )
+        self.navigation_rail = None
+        self.mobile_nav_bar = None
+        
+        if self.is_mobile_layout:
+            self.mobile_nav_bar = MobileNavigationBar(on_destination_selected=self._on_nav_change)
+            self.mobile_nav_bar.set_selection(self.current_view_index)
+        else:
+            self.navigation_rail = AppNavigationRail(on_destination_selected=self._on_nav_change)
+            self.navigation_rail.set_selection(self.current_view_index)
 
-        self.page.add(
-            ft.Row(
+        self._build_layout()
+
+    def _build_layout(self):
+        
+        self.page.controls.clear()
+        
+        if self.is_mobile_layout:
+
+            self.main_layout = ft.Column(
+                controls=[
+                    self.content_area,
+                    self.mobile_nav_bar
+                ],
+                expand=True,
+                spacing=0
+            )
+        else:
+
+            self.main_layout = ft.Row(
                 controls=[
                     self.navigation_rail,
                     self.content_area
                 ],
                 expand=True
             )
-        )
+        
+        self.page.add(self.main_layout)
 
     def _on_nav_change(self, index: int):
         
@@ -311,11 +367,13 @@ class HealthApp:
             return
         
         self.current_view_index = index
-        
 
-        if hasattr(self.navigation_rail, 'set_selection'):
-            self.navigation_rail.set_selection(index)
-        
+        if self.is_mobile_layout:
+            if hasattr(self, 'mobile_nav_bar') and self.mobile_nav_bar:
+                self.mobile_nav_bar.set_selection(index)
+        else:
+            if hasattr(self, 'navigation_rail') and self.navigation_rail:
+                self.navigation_rail.set_selection(index)
 
         loading_indicator = ft.Container(
             content=ft.Column(

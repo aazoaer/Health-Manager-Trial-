@@ -4,7 +4,7 @@ import uuid
 from ui.styles import AppColors, CARD_STYLE
 from core import event_bus
 from data.storage import load_user_data, save_user_data
-from ui.utils.confirmation import create_confirmation_dialog
+from ui.Desktop.utils.confirmation import create_confirmation_dialog
 from core.i18n import i18n_manager, I18nText
 
 class SleepCard(ft.Container):

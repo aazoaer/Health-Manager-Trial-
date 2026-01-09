@@ -143,3 +143,20 @@ def get_card_style():
         "border_radius": 15,
         "shadow": ft.BoxShadow(blur_radius=10, color=theme_manager.current_colors.CARD_SHADOW)
     }
+
+def is_mobile(page: ft.Page) -> bool:
+    
+    if not page or not page.width or not page.height:
+        return False
+    return page.height > page.width
+
+def get_responsive_padding(page: ft.Page) -> ft.Padding:
+    
+    if is_mobile(page):
+        return ft.padding.only(left=12, top=12, right=12, bottom=12)
+    return ft.padding.only(left=20, top=20, right=35, bottom=20)
+
+def get_responsive_spacing(page: ft.Page) -> int:
+    
+    return 12 if is_mobile(page) else 20
+

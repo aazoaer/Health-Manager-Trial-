@@ -1,10 +1,10 @@
 import flet as ft
 import sys
 from core.i18n import I18nText, i18n_manager
-from ui.components.language_select_card import LanguageSelectCard
-from ui.components.theme_select_card import ThemeSelectCard
-from ui.components.close_mode_card import CloseModeCard
-from ui.components.china_ai_mode_card import ChinaAIModeCard
+from ui.Desktop.components.language_select_card import LanguageSelectCard
+from ui.Desktop.components.theme_select_card import ThemeSelectCard
+from ui.Desktop.components.close_mode_card import CloseModeCard
+from ui.Desktop.components.china_ai_mode_card import ChinaAIModeCard
 from data.storage import save_user_data, load_user_data
 
 class SettingView(ft.Container):

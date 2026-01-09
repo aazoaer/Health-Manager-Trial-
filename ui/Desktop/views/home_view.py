@@ -1,8 +1,8 @@
 import flet as ft
-from ui.components.header import DateHeader
-from ui.components.user_info_card import UserInfoCard
-from ui.components.reminder_card import ReminderCard
-from ui.components.today_overview_card import TodayOverviewCard
+from ui.Desktop.components.header import DateHeader
+from ui.Desktop.components.user_info_card import UserInfoCard
+from ui.Desktop.components.reminder_card import ReminderCard
+from ui.Desktop.components.today_overview_card import TodayOverviewCard
 
 class HomeView(ft.Container):
     def __init__(self):

@@ -1,26 +1,25 @@
+
 import flet as ft
-from ui.components.calendar_grid_card import CalendarGridCard
-from ui.components.calendar_chart_card import CalendarChartCard
+from ui.Mobile.components.calendar_grid_card import CalendarGridCard
+from ui.Mobile.components.calendar_chart_card import CalendarChartCard
 
 class CalendarView(ft.Container):
+    
+    
     def __init__(self):
         super().__init__()
         self.expand = True
         
-
         self.chart_card = CalendarChartCard()
-        
-
         self.grid_card = CalendarGridCard(on_month_change=self.chart_card.update_month)
         
-        self.content = ft.Row(
+
+        self.content = ft.ListView(
             controls=[
                 self.grid_card,
                 self.chart_card
             ],
-            spacing=20,
+            spacing=10,
             expand=True,
-            vertical_alignment=ft.CrossAxisAlignment.STRETCH
+            padding=ft.padding.all(10)
         )
-        
-        self.padding = ft.padding.symmetric(horizontal=50, vertical=20)

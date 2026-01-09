@@ -1,6 +1,6 @@
 import flet as ft
-from ui.components.exercise_card import ExerciseCard
-from ui.components.exercise_stats_card import ExerciseStatsCard
+from ui.Desktop.components.exercise_card import ExerciseCard
+from ui.Desktop.components.exercise_stats_card import ExerciseStatsCard
 
 class ExerciseView(ft.Container):
     def __init__(self):

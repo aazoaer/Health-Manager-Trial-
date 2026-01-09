@@ -1,6 +1,6 @@
 import flet as ft
 from ui.styles import get_card_style, theme_manager
-from ui.utils.selection_dialog import SelectionDialog, SelectionOption
+from ui.Desktop.utils.selection_dialog import SelectionDialog, SelectionOption
 from core.i18n import i18n_manager, I18nText
 from data.storage import load_user_data
 

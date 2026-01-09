@@ -3,7 +3,7 @@ from ui.styles import AppColors, CARD_STYLE
 from core.search import search_food
 from data.storage import load_user_data, save_user_data
 from core.i18n import i18n_manager, I18nText
-from ui.components.custom_food_dialog import CustomFoodDialog
+from ui.Desktop.components.custom_food_dialog import CustomFoodDialog
 import copy
 import datetime
 
